@@ -35,6 +35,8 @@ app.use(express.json());
 *     description: Operações de CRUD para usuários no MongoDb.
 *   - name: Buckets
 *     description: Operações de Listar buckets, upload e remoção de arquivo para um bucket S3.
+*   - name: Produto
+*     description: Operações de CRUD para usuários no MySQL.
 */
 
 
