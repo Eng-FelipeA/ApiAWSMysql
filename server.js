@@ -277,14 +277,6 @@ app.delete('/buckets/:bucketName/file/:fileName', async (req, res) => {
 //#region MySQL
 
 const DB_NAME = process.env.DB_NAME || 'mydatabase';
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
 
 app.post('/init-db', async (req, res) => {
   try {
