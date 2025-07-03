@@ -17,7 +17,8 @@ const swaggerSpec = swaggerJSDoc(options);
 
 const swaggerDocs = (app) => {
     app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-    console.log('Swagger rodando em: http://localhost:3306/swagger');
+    console.log('Swagger rodando em: http://localhost:3000/swagger'); // Corrigido aqui
 };
 
 module.exports = swaggerDocs;
+
