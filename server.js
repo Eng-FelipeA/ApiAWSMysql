@@ -11,12 +11,10 @@ const mysql = require('mysql2/promise');
 const swaggerDocs = require('./swagger');
 const { logInfo, logError } = require('./logger');
 
-const mysql = require('mysql2/promise');
-
 const DB_HOST = process.env.DB_HOST;
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
-const DB_NAME = process.env.DB_NAME;
+const DB_NAME = process.env.DB_NAME || 'mydatabase';
 const DB_PORT = process.env.DB_PORT || 3306;
 
 const pool = mysql.createPool({
@@ -26,7 +24,6 @@ const pool = mysql.createPool({
   database: DB_NAME,
   port: DB_PORT
 });
-
 
 app.use(cors({
   origin: '*',
@@ -38,7 +35,8 @@ app.use(express.json());
 
 //#region MongoDB
 
-// Conectar uma única vez ao iniciar o app
+console.log('MONGO_URI:', process.env.MONGO_URI);  // DEBUG para ver se está carregando
+
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -53,23 +51,8 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('Usuario', UserSchema);
 
-/**
- * @swagger
- * /mongodb/testar-conexao:
- *   get:
- *     tags:
- *       - CRUD MongoDb
- *     summary: Testa a conexão com o MongoDB
- *     description: Verifica se a aplicação consegue se conectar ao MongoDB.
- *     responses:
- *       200:
- *         description: Conexão bem-sucedida
- *       500:
- *         description: Erro na conexão com o MongoDB
- */
 app.get('/mongodb/testar-conexao', async (req, res) => {
   try {
-    // Usar conexão já aberta
     const user = await User.findOne();
     logInfo('Conexão com o MongoDB efetuada com sucesso', req);
     if (user) {
@@ -83,47 +66,6 @@ app.get('/mongodb/testar-conexao', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /usuarios:
- *   post:
- *     tags:
- *       - CRUD MongoDb
- *     summary: Criar um novo usuário
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nome:
- *                 type: string
- *                 description: Nome do usuário
- *               email:
- *                 type: string
- *                 description: Email do usuário
- *             required:
- *               - nome
- *               - email
- *     responses:
- *       201:
- *         description: Usuário criado com sucesso.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 _id:
- *                   type: string
- *                   description: ID do usuário
- *                 nome:
- *                   type: string
- *                 email:
- *                   type: string
- *       400:
- *         description: Requisição inválida.
- */
 app.post('/usuarios', async (req, res) => {
   try {
     const user = new User(req.body);
@@ -194,7 +136,7 @@ app.delete('/usuarios/:id', async (req, res) => {
 
 AWS.config.update({
   region: process.env.REGION,
-  // Se necessário, pode habilitar as keys aqui
+  // Se necessário, habilite aqui:
   // accessKeyId: process.env.ACCESS_KEY_ID,
   // secretAccessKey: process.env.SECRET_ACCESS_KEY,
   // sessionToken: process.env.SESSION_TOKEN,
@@ -227,7 +169,6 @@ app.get('/buckets/:bucketName', async (req, res) => {
   }
 });
 
-// Configuração do multer para armazenar arquivo na memória
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.post('/buckets/:bucketName/upload', upload.single('file'), async (req, res) => {
@@ -275,8 +216,6 @@ app.delete('/buckets/:bucketName/file/:fileName', async (req, res) => {
 //#endregion
 
 //#region MySQL
-
-const DB_NAME = process.env.DB_NAME || 'mydatabase';
 
 app.post('/init-db', async (req, res) => {
   try {
@@ -376,4 +315,3 @@ swaggerDocs(app);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => console.log(`Servidor rodando na porta ${PORT}`));
-
